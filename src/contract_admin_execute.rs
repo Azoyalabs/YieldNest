@@ -46,9 +46,9 @@ pub fn route_admin_execute(
 }
 
 fn execute_market_order(
-    deps: DepsMut<InjectiveQueryWrapper>,
-    market_id: String,
-    is_buy_order: bool,
+    _deps: DepsMut<InjectiveQueryWrapper>,
+    _market_id: String,
+    _is_buy_order: bool,
 ) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
     return Ok(Response::new());
 }

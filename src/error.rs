@@ -1,4 +1,4 @@
-use cosmwasm_std::{StdError, Decimal};
+use cosmwasm_std::StdError;
 use injective_math::FPDecimal;
 use thiserror::Error;
 
@@ -40,9 +40,15 @@ pub enum ContractError {
     #[error("No valid midprice found")]
     NoValidMidpriceFound {},
     
-    #[error("Invalid debt position id")]
-    InvalidDebtPositionId {},
+    #[error("Invalid position id")]
+    InvalidPositionId {},
 
     #[error("Mismatch denom for redeem - required {denom_debt}")]
     MismatchDenomRedeem { denom_debt: String },
+
+    #[error("Position has enough collateral and cannot be liquidated")]
+    PositionEnoughCapitalNoLiquidation { },
+
+    #[error("Funds sent must match minted asset to liquidate a position")]
+    MismatchFundsMintedAssetsInLiquidation {},
 }

@@ -1,22 +1,21 @@
-use std::str::FromStr;
-
 use cosmwasm_std::{
-    BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Response, StdError, Uint128,
+    BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Response, Uint128,
 };
 use injective_cosmwasm::{
-    create_mint_tokens_msg, InjectiveMsgWrapper, InjectiveQuerier, InjectiveQueryWrapper,
+    create_burn_tokens_msg, create_mint_tokens_msg, InjectiveMsgWrapper, InjectiveQuerier,
+    InjectiveQueryWrapper,
 };
-use injective_math::FPDecimal;
 
 use crate::{
     msg::ExecuteMsg,
-    state::{DEBT_EXPIRATION, MARKET_IDS, MINT_POSITIONS, TRACKER_MINT_ID, USER_MINT_POSITIONS},
+    state::{
+        COLLATERAL_RATIO, LIQUIDATION_FEE_PCT, MARKET_IDS, MINT_POSITIONS,
+        TRACKER_MINT_ID, USER_MINT_POSITIONS,
+    },
     structs::{DebtTokenStatus, MintPositionRecord},
     utils::{validate_debt_token, validate_single_fund},
     ContractError,
 };
-
-//use proto_injective::prost_injective::Message;
 
 pub fn route_execute(
     deps: DepsMut<InjectiveQueryWrapper>,
@@ -29,25 +28,22 @@ pub fn route_execute(
             target_denom,
             quantity,
         } => execute_mint(deps, env, info, target_denom, quantity),
-        ExecuteMsg::Liquidate { target_id } => execute_liquidate(deps, env, info, target_id),
+        ExecuteMsg::Liquidate { position_id } => execute_liquidate(deps, env, info, position_id),
         ExecuteMsg::Repay { position_id } => execute_repay(deps, env, info, position_id),
-        ExecuteMsg::RedeemDebtAsset {} => execute_redeem(deps, env, info),
+        //ExecuteMsg::RedeemDebtAsset {} => execute_redeem(deps, env, info),
 
         // shouldn't happen here
         ExecuteMsg::Admin(_) => return Err(ContractError::Never {}),
     }
 }
 
-/// Redeem debt token
-/// Exchange module executes trades at end of block so two-step process
+/*
+/// Redeem debt token, receive debt token and send usdt back
 fn execute_redeem(
     deps: DepsMut<InjectiveQueryWrapper>,
     env: Env,
     info: MessageInfo,
 ) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
-    panic!("not implemented");
-
-    /*
     // validate funds
     let user_funds = validate_single_fund(info.funds)?;
 
@@ -67,16 +63,23 @@ fn execute_redeem(
             }));
         }
     }
-    */
 
-    // redeem equivalent amount of usdt 
-    // 2 cases, either enough usdt in the protocol or not enough 
-    // exchange module processes trades at end of block, so... 
-    // check for callback from trade module, or 2 steps process?  
-    
+    // redeem equivalent amount of usdt
+    let redeem_funds_msg = BankMsg::Send {
+        to_address: info.sender.into_string(),
+        amount: vec![Coin {
+            amount: user_funds.amount,
+            denom: "usdt".to_string(),
+        }],
+    };
 
+    // burn debt token
 
+    return Ok(
+        Response::new().add_message(redeem_funds_msg)
+    );
 }
+*/
 
 /// Repay a mint position
 fn execute_repay(
@@ -85,34 +88,29 @@ fn execute_repay(
     info: MessageInfo,
     position_id: u64, //target_denom: String,
 ) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
-    // swap back to base token underlying this asset
-    // or actually, can use the pooled assets from the mint? should always be overcollaterized
-    // this may require swaps?
-
     // validate funds
     let user_funds = validate_single_fund(info.funds)?;
 
+    /*
+    // NOT NEEDED FOR REPAY
     // is it a known debt token and has the debt token expired?
     match DEBT_EXPIRATION.load(deps.storage, user_funds.denom.clone()) {
         Ok(expiration_time) => {
             if expiration_time < env.block.time {
-                return Err(ContractError::Std(StdError::GenericErr {
-                    msg: "Token has not expired yet".to_string(),
-                }));
+                return Err(ContractError::TokenHasNotExpired {  });
             }
         }
         Err(_) => {
             // not a known debt token
-            return Err(ContractError::Std(StdError::GenericErr {
-                msg: "Unknown token".to_string(),
-            }));
+            return Err(ContractError::UnknownToken {  });
         }
     }
+    */
 
     // get data of the debt position
     let (minter, mut debt_position_data) = match MINT_POSITIONS.load(deps.storage, position_id) {
         Ok(pos) => pos,
-        Err(_) => return Err(ContractError::InvalidDebtPositionId {}),
+        Err(_) => return Err(ContractError::InvalidPositionId {}),
     };
 
     // check if match debt token issued for repayment
@@ -123,11 +121,16 @@ fn execute_repay(
     }
 
     // check if not sending too much
+    if user_funds.amount > debt_position_data.minted_asset.amount {
+        return Err(ContractError::InvalidFunds {});
+    }
 
     // modify debt data and prep settlement messages
     let mut msgs: Vec<CosmosMsg<InjectiveMsgWrapper>> = vec![];
 
     // burn debt token
+    let burn_msg = create_burn_tokens_msg(env.contract.address, user_funds.clone());
+    msgs.push(burn_msg);
 
     // update debt_position data
     debt_position_data.minted_asset.amount -= user_funds.amount;
@@ -205,7 +208,7 @@ fn execute_mint(
     let debt_value_usdt = midprice_debt_market.mul(quantity_to_mint.u128() as i128);
 
     // ensure that collateral is enough
-    let collateral_ratio = FPDecimal::from_str("0.7")?;
+    let collateral_ratio = COLLATERAL_RATIO.load(deps.storage)?;
 
     if collateral_ratio * deposit_value_usdt < debt_value_usdt {
         return Err(ContractError::InsufficientCollateral {
@@ -263,10 +266,124 @@ fn execute_mint(
 
 /// Liquidate an undercollaterized debt position
 fn execute_liquidate(
-    _deps: DepsMut<InjectiveQueryWrapper>,
+    deps: DepsMut<InjectiveQueryWrapper>,
     env: Env,
     info: MessageInfo,
-    target_id: String,
+    position_id: u64,
 ) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
-    return Ok(Response::new());
+    // validate deposit
+    let user_funds = validate_single_fund(info.funds)?;
+
+    // get position at id
+    let (minter, position_data) = match MINT_POSITIONS.load(deps.storage, position_id) {
+        Err(_) => return Err(ContractError::InvalidPositionId {}),
+        Ok(data) => data,
+    };
+
+    // check if has sent enough funds
+    if user_funds != position_data.minted_asset {
+        return Err(ContractError::MismatchFundsMintedAssetsInLiquidation {});
+    }
+
+    let querier = InjectiveQuerier::new(&deps.querier);
+
+    // check if below collateralization ratio
+    let collateral_usdt_market_id = MARKET_IDS.load(
+        deps.storage,
+        (
+            position_data.collateral_asset.denom.clone(),
+            "usdt".to_string(),
+        ),
+    )?;
+    let midprice_collateral_usdt = match querier
+        .query_spot_market_mid_price_and_tob(&collateral_usdt_market_id.as_str())
+        .unwrap()
+        .mid_price
+    {
+        None => return Err(ContractError::NoValidMidpriceFound {}),
+        Some(val) => val,
+    };
+    let collateral_value =
+        midprice_collateral_usdt.mul(position_data.collateral_asset.amount.u128() as i128);
+
+    let debt_usdt_market_id = MARKET_IDS.load(
+        deps.storage,
+        (position_data.minted_asset.denom, "usdt".to_string()),
+    )?;
+    let midprice_debt_usdt = match querier
+        .query_spot_market_mid_price_and_tob(&debt_usdt_market_id.as_str())
+        .unwrap()
+        .mid_price
+    {
+        None => return Err(ContractError::NoValidMidpriceFound {}),
+        Some(val) => val,
+    };
+    let debt_value = midprice_debt_usdt.mul(position_data.minted_asset.amount.u128() as i128);
+
+    // get collateral ratio expected
+    let collateral_ratio = COLLATERAL_RATIO.load(deps.storage)?;
+
+    // check if can liquidate
+    if collateral_value * collateral_ratio >= debt_value {
+        return Err(ContractError::PositionEnoughCapitalNoLiquidation {});
+    }
+
+    // process liquidation
+    // compute fee for liquidator and amount to sent back to user
+    let fee_liquidator_pct = LIQUIDATION_FEE_PCT.load(deps.storage)?;
+    let fee_liquidator_amount: Uint128 = fee_liquidator_pct
+        .mul(position_data.collateral_asset.amount.u128() as i128)
+        .to_u256()
+        .try_into()
+        .unwrap();
+    let collateral_sent_back = position_data.collateral_asset.amount - fee_liquidator_amount;
+
+    // prep messages
+    let mut msgs: Vec<CosmosMsg<InjectiveMsgWrapper>> = vec![];
+
+    // send fee to liquidator
+    msgs.push(
+        BankMsg::Send {
+            to_address: info.sender.to_string(),
+            amount: vec![Coin {
+                amount: fee_liquidator_amount,
+                denom: position_data.collateral_asset.denom.clone(),
+            }],
+        }
+        .into(),
+    );
+
+    // return rest of collateral to minter
+    msgs.push(
+        BankMsg::Send {
+            to_address: minter.clone().into_string(),
+            amount: vec![Coin {
+                amount: collateral_sent_back,
+                denom: position_data.collateral_asset.denom.clone(),
+            }],
+        }
+        .into(),
+    );
+
+    // burn debt token
+    msgs.push(create_burn_tokens_msg(
+        env.contract.address,
+        user_funds.clone(),
+    ));
+
+    // now write to state
+    // delete record position
+    MINT_POSITIONS.remove(deps.storage, position_id);
+    // remove from list of user positions 
+    USER_MINT_POSITIONS.update(
+        deps.storage,
+        minter,
+        |user_positions| -> Result<_, ContractError> {
+            let user_positions = user_positions.unwrap().into_iter().filter(|curr_id| curr_id.ne(&position_id)).collect();
+
+            return Ok(user_positions);
+        }
+    )?;
+
+    return Ok(Response::new().add_messages(msgs));
 }

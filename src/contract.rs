@@ -1,7 +1,10 @@
+use std::str::FromStr;
+
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
-use injective_cosmwasm::{InjectiveQueryWrapper, InjectiveMsgWrapper};
+use injective_cosmwasm::{InjectiveMsgWrapper, InjectiveQueryWrapper};
+use injective_math::FPDecimal;
 
 use crate::contract_admin_execute::route_admin_execute;
 use crate::contract_execute::route_execute;
@@ -10,11 +13,9 @@ use crate::contract_query::route_query;
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 
 use crate::error::ContractError;
-use crate::state::ADMIN;
+use crate::state::{ADMIN, LIQUIDATION_FEE_PCT, COLLATERAL_RATIO};
 
 use cw2::set_contract_version;
-
-const ENFORCE_ADMIN: bool = true;
 
 // version info for migration info
 const CONTRACT_NAME: &str = "AzoyaLabs:GroupBid";
@@ -23,28 +24,32 @@ const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
     deps: DepsMut<InjectiveQueryWrapper>,
-    env: Env,
+    _env: Env,
     info: MessageInfo,
-    _msg: InstantiateMsg,
+    msg: InstantiateMsg,
 ) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     ADMIN.save(deps.storage, &info.sender)?;
 
-    /*
-    if ENFORCE_ADMIN {
-        assert!(deps
-            .querier
-            .query_wasm_contract_info(env.contract.address)?
-            .admin
-            .is_some());
-    }
-    */
+    LIQUIDATION_FEE_PCT.save(
+        deps.storage,
+        &FPDecimal::from_str(&msg.liquidation_fee_pct).unwrap(),
+    )?;
+
+    COLLATERAL_RATIO.save(
+        deps.storage,
+        &FPDecimal::from_str(&msg.collateral_ratio).unwrap(),
+    )?;
 
     return Ok(Response::new());
 }
 
 #[entry_point]
-pub fn migrate(_deps: DepsMut<InjectiveQueryWrapper>, _env: Env, _msg: MigrateMsg) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
+pub fn migrate(
+    _deps: DepsMut<InjectiveQueryWrapper>,
+    _env: Env,
+    _msg: MigrateMsg,
+) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
     Ok(Response::default())
 }
 

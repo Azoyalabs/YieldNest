@@ -1,31 +1,4 @@
-/*
-use proto_injective::{
-    injective::auction::v1beta1::QueryModuleStateRequest, prost_injective::Message,
-};
-
-use crate::ContractError;
-
-pub fn query_auction_status(auction_id: u64) {}
-
-pub fn query_current_auction_status() {
-    let request = QueryModuleStateRequest {};
-}
-
-
-pub fn encode_message<T>(message: T) -> Result<Vec<u8>, ContractError>
-where
-    T: Message,
-{
-    let mut buf = vec![];
-
-    match message.encode(&mut buf) {
-        Ok(_) => return Ok(buf),
-        Err(_) => return Err(ContractError::MessageEncodingFailed {}),
-    }
-}
-*/
-
-use cosmwasm_std::{Coin, Decimal, Storage, Timestamp, Deps};
+use cosmwasm_std::{Coin, Storage, Timestamp, Deps};
 
 use crate::{state::DEBT_EXPIRATION, structs::DebtTokenStatus, ContractError};
 
@@ -78,5 +51,5 @@ pub fn parse_debt_token_components(denom_name: String, contract_address: String)
 
 
 pub fn compute_collateralization_ratio(minted: Coin, collateral: Coin, deps: Deps) {
-       
+          
 }
