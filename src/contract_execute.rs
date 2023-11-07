@@ -1,6 +1,4 @@
-use cosmwasm_std::{
-    BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Response, Uint128,
-};
+use cosmwasm_std::{BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Response, Uint128};
 use injective_cosmwasm::{
     create_burn_tokens_msg, create_mint_tokens_msg, InjectiveMsgWrapper, InjectiveQuerier,
     InjectiveQueryWrapper,
@@ -9,8 +7,8 @@ use injective_cosmwasm::{
 use crate::{
     msg::ExecuteMsg,
     state::{
-        COLLATERAL_RATIO, LIQUIDATION_FEE_PCT, MARKET_IDS, MINT_POSITIONS,
-        TRACKER_MINT_ID, USER_MINT_POSITIONS,
+        COLLATERAL_RATIO, LIQUIDATION_FEE_PCT, MARKET_IDS, MINT_POSITIONS, TRACKER_MINT_ID,
+        USER_MINT_POSITIONS,
     },
     structs::{DebtTokenStatus, MintPositionRecord},
     utils::{validate_debt_token, validate_single_fund},
@@ -91,22 +89,6 @@ fn execute_repay(
     // validate funds
     let user_funds = validate_single_fund(info.funds)?;
 
-    /*
-    // NOT NEEDED FOR REPAY
-    // is it a known debt token and has the debt token expired?
-    match DEBT_EXPIRATION.load(deps.storage, user_funds.denom.clone()) {
-        Ok(expiration_time) => {
-            if expiration_time < env.block.time {
-                return Err(ContractError::TokenHasNotExpired {  });
-            }
-        }
-        Err(_) => {
-            // not a known debt token
-            return Err(ContractError::UnknownToken {  });
-        }
-    }
-    */
-
     // get data of the debt position
     let (minter, mut debt_position_data) = match MINT_POSITIONS.load(deps.storage, position_id) {
         Ok(pos) => pos,
@@ -176,8 +158,10 @@ fn execute_mint(
 
     // value inj deposit in usdt
     let querier = InjectiveQuerier::new(&deps.querier);
+    let market_id_inj_usdt =
+        MARKET_IDS.load(deps.storage, ("inj".to_string(), ("usdt".to_string())))?;
     let midprice_inj_usdt = match querier
-        .query_spot_market_mid_price_and_tob(&"inj/usdt")
+        .query_spot_market_mid_price_and_tob(&market_id_inj_usdt.as_str())
         .unwrap()
         .mid_price
     {
@@ -189,15 +173,15 @@ fn execute_mint(
 
     // get market id for the debt token
     // need to register market ids? coz it's a hash, not a string from the denoms
-    let market_id = match MARKET_IDS.load(deps.storage, (target_denom.clone(), "usdt".to_string()))
-    {
-        Ok(val) => val,
-        Err(_) => return Err(ContractError::UnknownMarket {}),
-    };
+    let debt_market_id =
+        match MARKET_IDS.load(deps.storage, (target_denom.clone(), "usdt".to_string())) {
+            Ok(val) => val,
+            Err(_) => return Err(ContractError::UnknownMarket {}),
+        };
 
     // get exchange midprice
     let midprice_debt_market = match querier
-        .query_spot_market_mid_price_and_tob(&market_id.as_str())
+        .query_spot_market_mid_price_and_tob(&debt_market_id.as_str())
         .unwrap()
         .mid_price
     {
@@ -208,11 +192,11 @@ fn execute_mint(
     let debt_value_usdt = midprice_debt_market.mul(quantity_to_mint.u128() as i128);
 
     // ensure that collateral is enough
-    let collateral_ratio = COLLATERAL_RATIO.load(deps.storage)?;
+    let required_collateral_ratio = COLLATERAL_RATIO.load(deps.storage)?;
 
-    if collateral_ratio * deposit_value_usdt < debt_value_usdt {
+    if debt_value_usdt / deposit_value_usdt > required_collateral_ratio {
         return Err(ContractError::InsufficientCollateral {
-            required_collateral_ratio: collateral_ratio,
+            required_collateral_ratio: required_collateral_ratio,
         });
     }
 
@@ -324,7 +308,7 @@ fn execute_liquidate(
     let collateral_ratio = COLLATERAL_RATIO.load(deps.storage)?;
 
     // check if can liquidate
-    if collateral_value * collateral_ratio >= debt_value {
+    if debt_value / collateral_value <= collateral_ratio {
         return Err(ContractError::PositionEnoughCapitalNoLiquidation {});
     }
 
@@ -374,15 +358,19 @@ fn execute_liquidate(
     // now write to state
     // delete record position
     MINT_POSITIONS.remove(deps.storage, position_id);
-    // remove from list of user positions 
+    // remove from list of user positions
     USER_MINT_POSITIONS.update(
         deps.storage,
         minter,
         |user_positions| -> Result<_, ContractError> {
-            let user_positions = user_positions.unwrap().into_iter().filter(|curr_id| curr_id.ne(&position_id)).collect();
+            let user_positions = user_positions
+                .unwrap()
+                .into_iter()
+                .filter(|curr_id| curr_id.ne(&position_id))
+                .collect();
 
             return Ok(user_positions);
-        }
+        },
     )?;
 
     return Ok(Response::new().add_messages(msgs));

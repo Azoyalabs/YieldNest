@@ -13,7 +13,7 @@ use crate::contract_query::route_query;
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 
 use crate::error::ContractError;
-use crate::state::{ADMIN, LIQUIDATION_FEE_PCT, COLLATERAL_RATIO};
+use crate::state::{ADMIN, COLLATERAL_RATIO, LIQUIDATION_FEE_PCT};
 
 use cw2::set_contract_version;
 

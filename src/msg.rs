@@ -1,7 +1,7 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, Coin, Timestamp, Uint128};
 
-use crate::structs::MintPositionRecord;
+use crate::structs::{DebtTokenRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio};
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -18,10 +18,12 @@ pub enum AdminExecuteMsg {
         subdenom: String,
         expiry: Timestamp,
     },
+    /*
     CreateMarket {
         base_denom: String,
         quote_denom: String,
     },
+    */
     RegisterMarket {
         base_currency: String,
         quote_currency: String,
@@ -29,11 +31,6 @@ pub enum AdminExecuteMsg {
     },
     MintDenom {
         mint_data: Coin,
-    },
-    /// Send a market order to be executed by the exchange module, to manage available liquidity
-    MarketOrder {
-        market_id: String,
-        is_buy_order: bool,
     },
 }
 
@@ -68,8 +65,18 @@ pub enum QueryMsg {
 
     #[returns(GetUserMintPositionsResponse)]
     GetUserMintPositions { user_address: Addr },
+
+    #[returns(GetUserMintPositionsWithCollateralResponse)]
+    GetUserMintPositionsWithCollateral { user_address: Addr },
+
+    #[returns(GetDebtTokensResponse)]
+    GetDebtTokens {},
 }
 
+#[cw_serde]
+pub struct GetDebtTokensResponse {
+    pub tokens: Vec<DebtTokenRecord>,
+}
 
 #[cw_serde]
 pub struct GetAdminResponse {
@@ -80,4 +87,9 @@ pub struct GetAdminResponse {
 #[cw_serde]
 pub struct GetUserMintPositionsResponse {
     pub mint_positions: Vec<MintPositionRecord>,
+}
+
+#[cw_serde]
+pub struct GetUserMintPositionsWithCollateralResponse {
+    pub mint_positions: Vec<MintPositionRecordWithCollateralRatio>,
 }

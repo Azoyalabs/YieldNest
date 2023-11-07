@@ -32,6 +32,9 @@ NEED TO ADD possibility of reimbursing debt with base token if after expiry
 needed since may be mismatch between debt available and base token. Plus users who forgot positions in debt would be locking others out of their liquidity forever  
 
 
+Collateral ratio <= 1.0, debt / collateral 
+
+
 ## Behaviour  
 
 ### Creating a new denom  

@@ -83,7 +83,13 @@ impl Module for WasmKeeper<InjectiveMsg, InjectiveQueryWrapper> {
 }
 */
 
-pub fn create_app() -> App<BankKeeper, MockApi, MemoryStorage, CustomInjective, WasmKeeper<InjectiveMsg, InjectiveQueryWrapper>> {
+pub fn create_app() -> App<
+    BankKeeper,
+    MockApi,
+    MemoryStorage,
+    CustomInjective,
+    WasmKeeper<InjectiveMsg, InjectiveQueryWrapper>,
+> {
     //-> App<BankKeeper, MockApi, MemoryStorage, CustomInjective> {
     //let builder = AppBuilder::new_custom().with_custom(CustomInjective {});
 

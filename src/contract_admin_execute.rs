@@ -29,28 +29,18 @@ pub fn route_admin_execute(
             execute_create_debt_token(deps, env, subdenom, expiry)
         }
         AdminExecuteMsg::MintDenom { mint_data } => execute_mint_denom(deps, env, info, mint_data),
+        /*
         AdminExecuteMsg::CreateMarket {
             base_denom,
             quote_denom,
         } => execute_create_market(deps, env, base_denom, quote_denom),
+        */
         AdminExecuteMsg::RegisterMarket {
             base_currency,
             quote_currency,
             market_id,
         } => execute_register_market(deps, base_currency, quote_currency, market_id),
-        AdminExecuteMsg::MarketOrder {
-            market_id,
-            is_buy_order,
-        } => execute_market_order(deps, market_id, is_buy_order),
     }
-}
-
-fn execute_market_order(
-    _deps: DepsMut<InjectiveQueryWrapper>,
-    _market_id: String,
-    _is_buy_order: bool,
-) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
-    return Ok(Response::new());
 }
 
 fn execute_register_market(
@@ -64,6 +54,7 @@ fn execute_register_market(
     return Ok(Response::new());
 }
 
+/*
 fn execute_create_market(
     _deps: DepsMut<InjectiveQueryWrapper>,
     _env: Env,
@@ -74,6 +65,7 @@ fn execute_create_market(
 
     //return Ok(Response::new());
 }
+*/
 
 /// Call the token factory module to create a new debt token
 /// From docs: The tokenfactory module allows any account to create a new token with the name factory/{creator address}/{subdenom}.

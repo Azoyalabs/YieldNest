@@ -35,11 +35,13 @@ pub enum ContractError {
     TokenHasExpired {},
 
     #[error("Insufficient collateral - must be at least {required_collateral_ratio}%")]
-    InsufficientCollateral { required_collateral_ratio: FPDecimal },
+    InsufficientCollateral {
+        required_collateral_ratio: FPDecimal,
+    },
 
     #[error("No valid midprice found")]
     NoValidMidpriceFound {},
-    
+
     #[error("Invalid position id")]
     InvalidPositionId {},
 
@@ -47,7 +49,7 @@ pub enum ContractError {
     MismatchDenomRedeem { denom_debt: String },
 
     #[error("Position has enough collateral and cannot be liquidated")]
-    PositionEnoughCapitalNoLiquidation { },
+    PositionEnoughCapitalNoLiquidation {},
 
     #[error("Funds sent must match minted asset to liquidate a position")]
     MismatchFundsMintedAssetsInLiquidation {},

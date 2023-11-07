@@ -15,7 +15,6 @@ pub const COLLATERAL_RATIO: Item<FPDecimal> = Item::new("collateral_ratio");
 
 pub const LIQUIDATION_FEE_PCT: Item<FPDecimal> = Item::new("liquidation_fee_pct");
 
-
 /// Unique per position ID
 pub const TRACKER_MINT_ID: Item<u64> = Item::new("tracker_mint_id");
 
@@ -25,4 +24,3 @@ pub const USER_MINT_POSITIONS: Map<Addr, Vec<u64>> = Map::new("user_mint_positio
 
 /// Tracking the expiration timestamp of debt tokens  
 pub const DEBT_EXPIRATION: Map<String, Timestamp> = Map::new("debt_expiration");
-
