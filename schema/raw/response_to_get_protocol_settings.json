@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GetProtocolSettingsResponse",
+  "type": "object",
+  "required": [
+    "collateral_ratio",
+    "liquidation_fee_pct"
+  ],
+  "properties": {
+    "collateral_ratio": {
+      "$ref": "#/definitions/FPDecimal"
+    },
+    "liquidation_fee_pct": {
+      "$ref": "#/definitions/FPDecimal"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "FPDecimal": {
+      "type": "object",
+      "required": [
+        "num",
+        "sign"
+      ],
+      "properties": {
+        "num": {
+          "type": "string"
+        },
+        "sign": {
+          "type": "integer",
+          "format": "int8"
+        }
+      }
+    }
+  }
+}

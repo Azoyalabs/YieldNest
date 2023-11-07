@@ -1,5 +1,6 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, Coin, Timestamp, Uint128};
+use injective_math::FPDecimal;
 
 use crate::structs::{DebtTokenRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio};
 
@@ -71,6 +72,9 @@ pub enum QueryMsg {
 
     #[returns(GetDebtTokensResponse)]
     GetDebtTokens {},
+
+    #[returns(GetProtocolSettingsResponse)]
+    GetProtocolSettings {},
 }
 
 #[cw_serde]
@@ -81,6 +85,12 @@ pub struct GetDebtTokensResponse {
 #[cw_serde]
 pub struct GetAdminResponse {
     pub admin: Option<Addr>,
+}
+
+#[cw_serde]
+pub struct GetProtocolSettingsResponse {
+    pub collateral_ratio: FPDecimal,
+    pub liquidation_fee_pct: FPDecimal,
 }
 
 // We define a custom struct for each query response

@@ -7,10 +7,13 @@ use injective_math::FPDecimal;
 
 use crate::{
     msg::{
-        GetAdminResponse, GetDebtTokensResponse, GetUserMintPositionsResponse,
-        GetUserMintPositionsWithCollateralRatioResponse, QueryMsg,
+        GetAdminResponse, GetDebtTokensResponse, GetProtocolSettingsResponse,
+        GetUserMintPositionsResponse, GetUserMintPositionsWithCollateralRatioResponse, QueryMsg,
     },
-    state::{ADMIN, DEBT_EXPIRATION, MARKET_IDS, MINT_POSITIONS, USER_MINT_POSITIONS},
+    state::{
+        ADMIN, COLLATERAL_RATIO, DEBT_EXPIRATION, LIQUIDATION_FEE_PCT, MARKET_IDS, MINT_POSITIONS,
+        USER_MINT_POSITIONS,
+    },
     structs::{
         DebtTokenRecord, MarketRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio,
     },
@@ -31,6 +34,7 @@ pub fn route_query(
             get_user_mint_positions_with_collateral_ratio(deps, user_address)
         }
         QueryMsg::GetDebtTokens {} => get_debt_tokens(deps),
+        QueryMsg::GetProtocolSettings {} => get_protocol_settings(deps),
     };
 
     return Ok(to_json_binary(&res)?);
@@ -39,6 +43,13 @@ pub fn route_query(
 fn get_admin(deps: Deps<InjectiveQueryWrapper>) -> Box<dyn Serialize> {
     return Box::new(GetAdminResponse {
         admin: ADMIN.load(deps.storage).ok(),
+    });
+}
+
+fn get_protocol_settings(deps: Deps<InjectiveQueryWrapper>) -> Box<dyn Serialize> {
+    return Box::new(GetProtocolSettingsResponse {
+        liquidation_fee_pct: LIQUIDATION_FEE_PCT.load(deps.storage).unwrap(),
+        collateral_ratio: COLLATERAL_RATIO.load(deps.storage).unwrap(),
     });
 }
 
