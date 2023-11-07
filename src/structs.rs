@@ -49,4 +49,13 @@ pub struct MintPositionRecordWithCollateralRatio {
 pub struct DebtTokenRecord {
     pub denom: String,
     pub expiry: Timestamp,
+    pub market_record: MarketRecord
 }
+
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct MarketRecord {
+    pub ticker: String,
+    pub market_id: String,
+}
+

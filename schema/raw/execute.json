@@ -38,11 +38,13 @@
         "liquidate": {
           "type": "object",
           "required": [
-            "target_id"
+            "position_id"
           ],
           "properties": {
-            "target_id": {
-              "type": "string"
+            "position_id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
             }
           },
           "additionalProperties": false
@@ -51,21 +53,7 @@
       "additionalProperties": false
     },
     {
-      "description": "Redeem bond asset and swap back to usdt",
-      "type": "object",
-      "required": [
-        "redeem_debt_asset"
-      ],
-      "properties": {
-        "redeem_debt_asset": {
-          "type": "object",
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    {
-      "description": "Repay debt position",
+      "description": "Redeem bond asset and swap back to usdt Repay debt position",
       "type": "object",
       "required": [
         "repay"
@@ -153,31 +141,6 @@
         {
           "type": "object",
           "required": [
-            "create_market"
-          ],
-          "properties": {
-            "create_market": {
-              "type": "object",
-              "required": [
-                "base_denom",
-                "quote_denom"
-              ],
-              "properties": {
-                "base_denom": {
-                  "type": "string"
-                },
-                "quote_denom": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "required": [
             "register_market"
           ],
           "properties": {
@@ -218,32 +181,6 @@
               "properties": {
                 "mint_data": {
                   "$ref": "#/definitions/Coin"
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "additionalProperties": false
-        },
-        {
-          "description": "Send a market order to be executed by the exchange module, to manage available liquidity",
-          "type": "object",
-          "required": [
-            "market_order"
-          ],
-          "properties": {
-            "market_order": {
-              "type": "object",
-              "required": [
-                "is_buy_order",
-                "market_id"
-              ],
-              "properties": {
-                "is_buy_order": {
-                  "type": "boolean"
-                },
-                "market_id": {
-                  "type": "string"
                 }
               },
               "additionalProperties": false

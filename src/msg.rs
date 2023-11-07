@@ -66,8 +66,8 @@ pub enum QueryMsg {
     #[returns(GetUserMintPositionsResponse)]
     GetUserMintPositions { user_address: Addr },
 
-    #[returns(GetUserMintPositionsWithCollateralResponse)]
-    GetUserMintPositionsWithCollateral { user_address: Addr },
+    #[returns(GetUserMintPositionsWithCollateralRatioResponse)]
+    GetUserMintPositionsWithCollateralRatio { user_address: Addr },
 
     #[returns(GetDebtTokensResponse)]
     GetDebtTokens {},
@@ -90,6 +90,6 @@ pub struct GetUserMintPositionsResponse {
 }
 
 #[cw_serde]
-pub struct GetUserMintPositionsWithCollateralResponse {
+pub struct GetUserMintPositionsWithCollateralRatioResponse {
     pub mint_positions: Vec<MintPositionRecordWithCollateralRatio>,
 }

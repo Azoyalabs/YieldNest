@@ -8,10 +8,12 @@ use injective_math::FPDecimal;
 use crate::{
     msg::{
         GetAdminResponse, GetDebtTokensResponse, GetUserMintPositionsResponse,
-        GetUserMintPositionsWithCollateralResponse, QueryMsg,
+        GetUserMintPositionsWithCollateralRatioResponse, QueryMsg,
     },
     state::{ADMIN, DEBT_EXPIRATION, MARKET_IDS, MINT_POSITIONS, USER_MINT_POSITIONS},
-    structs::{DebtTokenRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio},
+    structs::{
+        DebtTokenRecord, MarketRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio,
+    },
     ContractError,
 };
 
@@ -25,7 +27,7 @@ pub fn route_query(
         QueryMsg::GetUserMintPositions { user_address } => {
             get_user_mint_positions(deps, user_address)
         }
-        QueryMsg::GetUserMintPositionsWithCollateral { user_address } => {
+        QueryMsg::GetUserMintPositionsWithCollateralRatio { user_address } => {
             get_user_mint_positions_with_collateral_ratio(deps, user_address)
         }
         QueryMsg::GetDebtTokens {} => get_debt_tokens(deps),
@@ -45,7 +47,21 @@ fn get_debt_tokens(deps: Deps<InjectiveQueryWrapper>) -> Box<dyn Serialize> {
         .range(deps.storage, None, None, cosmwasm_std::Order::Ascending)
         .filter_map(|val| match val {
             Err(_) => None,
-            Ok((denom, expiry)) => Some(DebtTokenRecord { denom, expiry }),
+            Ok((denom, expiry)) => {
+                // get token market id
+                let market_id = MARKET_IDS
+                    .load(deps.storage, (denom.clone(), "usdt".to_string()))
+                    .unwrap();
+                let market_ticker = format!("{}/usdt", denom);
+                Some(DebtTokenRecord {
+                    denom,
+                    expiry,
+                    market_record: MarketRecord {
+                        market_id: market_id,
+                        ticker: market_ticker,
+                    },
+                })
+            }
         })
         .collect();
 
@@ -145,7 +161,7 @@ fn get_user_mint_positions_with_collateral_ratio(
         });
     }
 
-    return Box::new(GetUserMintPositionsWithCollateralResponse {
+    return Box::new(GetUserMintPositionsWithCollateralRatioResponse {
         mint_positions: positions_with_collateral_ratio,
     });
 }
