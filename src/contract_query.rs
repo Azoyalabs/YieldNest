@@ -306,7 +306,7 @@ fn get_user_mint_positions_with_collateral_ratio(
 
         // return pos
         positions_with_collateral_ratio.push(MintPositionRecordWithCollateralRatio {
-            position_id: i as u64,
+            position_id: id_positions[i] as u64,
             minter: user_address.clone(),
             collateral_asset: positions[i].collateral_asset.clone(),
             minted_asset: positions[i].minted_asset.clone(),
