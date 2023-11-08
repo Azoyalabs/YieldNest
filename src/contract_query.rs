@@ -1,14 +1,16 @@
 use std::collections::HashMap;
 
 use cosmwasm_std::{to_json_binary, Addr, Binary, Deps, Env, StdResult};
+use cw_storage_plus::Bound;
 use erased_serde::Serialize;
 use injective_cosmwasm::{InjectiveQuerier, InjectiveQueryWrapper};
 use injective_math::FPDecimal;
 
 use crate::{
     msg::{
-        GetAdminResponse, GetDebtTokensResponse, GetProtocolSettingsResponse,
-        GetUserMintPositionsResponse, GetUserMintPositionsWithCollateralRatioResponse, QueryMsg,
+        GetAdminResponse, GetBatchMintPositionsResponse, GetDebtTokensResponse,
+        GetMintPositionResponse, GetProtocolSettingsResponse, GetUserMintPositionsResponse,
+        GetUserMintPositionsWithCollateralRatioResponse, QueryMsg,
     },
     state::{
         ADMIN, COLLATERAL_RATIO, DEBT_EXPIRATION, LIQUIDATION_FEE_PCT, MARKET_IDS, MINT_POSITIONS,
@@ -33,11 +35,149 @@ pub fn route_query(
         QueryMsg::GetUserMintPositionsWithCollateralRatio { user_address } => {
             get_user_mint_positions_with_collateral_ratio(deps, user_address)
         }
+        QueryMsg::GetMintPosition { position_id } => get_mint_position(deps, position_id),
         QueryMsg::GetDebtTokens {} => get_debt_tokens(deps),
         QueryMsg::GetProtocolSettings {} => get_protocol_settings(deps),
+        QueryMsg::GetBatchMintPositions { start_id, count } => {
+            get_batch_mint_positions(deps, start_id, count)
+        }
     };
 
     return Ok(to_json_binary(&res)?);
+}
+
+fn get_batch_mint_positions(
+    deps: Deps<InjectiveQueryWrapper>,
+    start_id: u64,
+    count: u64,
+) -> Box<dyn Serialize> {
+    let positions: Vec<(u64, (Addr, MintPositionRecord))> = MINT_POSITIONS
+        .range(
+            deps.storage,
+            Some(Bound::inclusive(start_id)),
+            None,
+            cosmwasm_std::Order::Ascending,
+        )
+        .filter_map(|elem| elem.ok())
+        .take(count as usize)
+        .collect();
+
+    // store exchange rates to avoid repeated queries for the same pair
+    let mut exchange_rates: HashMap<(String, String), FPDecimal> = HashMap::new();
+
+    // get exchange rate inj usdt
+    let inj_usdt_market_id = MARKET_IDS
+        .load(deps.storage, ("inj".to_string(), "usdt".to_string()))
+        .unwrap();
+
+    let querier = InjectiveQuerier::new(&deps.querier);
+    let midprice_inj_usdt = querier
+        .query_spot_market_mid_price_and_tob(&inj_usdt_market_id.as_str())
+        .unwrap()
+        .mid_price
+        .unwrap();
+
+    let mut positions_with_collateral_ratio: Vec<MintPositionRecordWithCollateralRatio> = vec![];
+    for i in 0..positions.len() {
+        // is the exchange rate in the hashmap?
+        let price_debt_usdt = match exchange_rates.get(&(
+            positions[i].1 .1.minted_asset.denom.clone(),
+            "usdt".to_string(),
+        )) {
+            Some(rate) => *rate,
+            None => {
+                let market_id = MARKET_IDS
+                    .load(
+                        deps.storage,
+                        (
+                            positions[i].1 .1.minted_asset.denom.clone(),
+                            "usdt".to_string(),
+                        ),
+                    )
+                    .unwrap();
+
+                let debt_usdt_rate = querier
+                    .query_spot_market_mid_price_and_tob(&market_id.as_str())
+                    .unwrap()
+                    .mid_price
+                    .unwrap();
+
+                exchange_rates.insert(
+                    (
+                        positions[i].1 .1.minted_asset.denom.clone(),
+                        "usdt".to_string(),
+                    ),
+                    debt_usdt_rate,
+                );
+
+                debt_usdt_rate
+            }
+        };
+
+        // now compute collateral ratio
+        let collateral_ratio = (price_debt_usdt
+            .mul(positions[i].1 .1.minted_asset.amount.u128() as i128))
+            / (midprice_inj_usdt.mul(positions[i].1 .1.collateral_asset.amount.u128() as i128));
+
+        // return pos
+        positions_with_collateral_ratio.push(MintPositionRecordWithCollateralRatio {
+            position_id: positions[i].0,
+            minter: positions[i].1 .0.clone(),
+            collateral_asset: positions[i].1 .1.collateral_asset.clone(),
+            minted_asset: positions[i].1 .1.minted_asset.clone(),
+            collateral_ratio: collateral_ratio,
+        });
+    }
+
+    return Box::new(GetBatchMintPositionsResponse {
+        positions: positions_with_collateral_ratio,
+    });
+}
+
+fn get_mint_position(deps: Deps<InjectiveQueryWrapper>, position_id: u64) -> Box<dyn Serialize> {
+    let (minter, position_data) = match MINT_POSITIONS.load(deps.storage, position_id) {
+        Err(_) => return Box::new(GetMintPositionResponse { position: None }),
+        Ok(data) => data,
+    };
+
+    // get exchange rate inj usdt
+    let inj_usdt_market_id = MARKET_IDS
+        .load(deps.storage, ("inj".to_string(), "usdt".to_string()))
+        .unwrap();
+
+    let querier = InjectiveQuerier::new(&deps.querier);
+    let midprice_inj_usdt = querier
+        .query_spot_market_mid_price_and_tob(&inj_usdt_market_id.as_str())
+        .unwrap()
+        .mid_price
+        .unwrap();
+
+    let market_id = MARKET_IDS
+        .load(
+            deps.storage,
+            (position_data.minted_asset.denom.clone(), "usdt".to_string()),
+        )
+        .unwrap();
+
+    let price_debt_usdt = querier
+        .query_spot_market_mid_price_and_tob(&market_id.as_str())
+        .unwrap()
+        .mid_price
+        .unwrap();
+
+    // now compute collateral ratio
+    let collateral_ratio = (price_debt_usdt.mul(position_data.minted_asset.amount.u128() as i128))
+        / (midprice_inj_usdt.mul(position_data.collateral_asset.amount.u128() as i128));
+
+    return Box::new(GetMintPositionResponse {
+        position: Some(MintPositionRecordWithCollateralRatio {
+            position_id: position_id,
+            minter: minter,
+            collateral_asset: position_data.collateral_asset,
+            minted_asset: position_data.minted_asset,
+            collateral_ratio: collateral_ratio,
+        }),
+    });
 }
 
 fn get_admin(deps: Deps<InjectiveQueryWrapper>) -> Box<dyn Serialize> {
@@ -104,7 +244,7 @@ fn get_user_mint_positions_with_collateral_ratio(
     deps: Deps<InjectiveQueryWrapper>,
     user_address: Addr,
 ) -> Box<dyn Serialize> {
-    let id_positions = match USER_MINT_POSITIONS.load(deps.storage, user_address) {
+    let id_positions = match USER_MINT_POSITIONS.load(deps.storage, user_address.clone()) {
         Ok(pos) => pos,
         Err(_) => vec![],
     };
@@ -166,6 +306,8 @@ fn get_user_mint_positions_with_collateral_ratio(
 
         // return pos
         positions_with_collateral_ratio.push(MintPositionRecordWithCollateralRatio {
+            position_id: i as u64,
+            minter: user_address.clone(),
             collateral_asset: positions[i].collateral_asset.clone(),
             minted_asset: positions[i].minted_asset.clone(),
             collateral_ratio: collateral_ratio,

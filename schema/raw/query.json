@@ -60,6 +60,58 @@
     {
       "type": "object",
       "required": [
+        "get_mint_position"
+      ],
+      "properties": {
+        "get_mint_position": {
+          "type": "object",
+          "required": [
+            "position_id"
+          ],
+          "properties": {
+            "position_id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "get_batch_mint_positions"
+      ],
+      "properties": {
+        "get_batch_mint_positions": {
+          "type": "object",
+          "required": [
+            "count",
+            "start_id"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            "start_id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
         "get_debt_tokens"
       ],
       "properties": {

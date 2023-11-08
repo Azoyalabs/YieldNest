@@ -1,4 +1,4 @@
-use cosmwasm_std::{Coin, Timestamp, Uint128};
+use cosmwasm_std::{Addr, Coin, Timestamp, Uint128};
 use injective_math::FPDecimal;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -40,6 +40,8 @@ pub struct MintPositionRecord {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct MintPositionRecordWithCollateralRatio {
+    pub position_id: u64,
+    pub minter: Addr,
     pub collateral_asset: Coin,
     pub minted_asset: Coin,
     pub collateral_ratio: FPDecimal,
@@ -49,13 +51,11 @@ pub struct MintPositionRecordWithCollateralRatio {
 pub struct DebtTokenRecord {
     pub denom: String,
     pub expiry: Timestamp,
-    pub market_record: MarketRecord
+    pub market_record: MarketRecord,
 }
-
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct MarketRecord {
     pub ticker: String,
     pub market_id: String,
 }
-

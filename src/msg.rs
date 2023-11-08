@@ -70,11 +70,27 @@ pub enum QueryMsg {
     #[returns(GetUserMintPositionsWithCollateralRatioResponse)]
     GetUserMintPositionsWithCollateralRatio { user_address: Addr },
 
+    #[returns(GetMintPositionResponse)]
+    GetMintPosition { position_id: u64 },
+
+    #[returns(GetBatchMintPositionsResponse)]
+    GetBatchMintPositions { start_id: u64, count: u64 },
+
     #[returns(GetDebtTokensResponse)]
     GetDebtTokens {},
 
     #[returns(GetProtocolSettingsResponse)]
     GetProtocolSettings {},
+}
+
+#[cw_serde]
+pub struct GetBatchMintPositionsResponse {
+    pub positions: Vec<MintPositionRecordWithCollateralRatio>,
+}
+
+#[cw_serde]
+pub struct GetMintPositionResponse {
+    pub position: Option<MintPositionRecordWithCollateralRatio>,
 }
 
 #[cw_serde]
