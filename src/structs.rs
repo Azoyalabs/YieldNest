@@ -59,3 +59,10 @@ pub struct MarketRecord {
     pub ticker: String,
     pub market_id: String,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct RegisteredMarketRecord {
+    pub base_currency: String,
+    pub quote_currency: String,
+    pub market_id: String,
+}

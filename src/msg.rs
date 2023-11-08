@@ -2,7 +2,10 @@ use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, Coin, Timestamp, Uint128};
 use injective_math::FPDecimal;
 
-use crate::structs::{DebtTokenRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio};
+use crate::structs::{
+    DebtTokenRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio,
+    RegisteredMarketRecord,
+};
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -81,6 +84,14 @@ pub enum QueryMsg {
 
     #[returns(GetProtocolSettingsResponse)]
     GetProtocolSettings {},
+
+    #[returns(GetRegisteredMarketsResponse)]
+    GetRegisteredMarkets {},
+}
+
+#[cw_serde]
+pub struct GetRegisteredMarketsResponse {
+    pub markets: Vec<RegisteredMarketRecord>,
 }
 
 #[cw_serde]

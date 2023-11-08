@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GetRegisteredMarketsResponse",
+  "type": "object",
+  "required": [
+    "markets"
+  ],
+  "properties": {
+    "markets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/RegisteredMarketRecord"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "RegisteredMarketRecord": {
+      "type": "object",
+      "required": [
+        "base_currency",
+        "market_id",
+        "quote_currency"
+      ],
+      "properties": {
+        "base_currency": {
+          "type": "string"
+        },
+        "market_id": {
+          "type": "string"
+        },
+        "quote_currency": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

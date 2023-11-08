@@ -9,8 +9,8 @@ use injective_math::FPDecimal;
 use crate::{
     msg::{
         GetAdminResponse, GetBatchMintPositionsResponse, GetDebtTokensResponse,
-        GetMintPositionResponse, GetProtocolSettingsResponse, GetUserMintPositionsResponse,
-        GetUserMintPositionsWithCollateralRatioResponse, QueryMsg,
+        GetMintPositionResponse, GetProtocolSettingsResponse, GetRegisteredMarketsResponse,
+        GetUserMintPositionsResponse, GetUserMintPositionsWithCollateralRatioResponse, QueryMsg,
     },
     state::{
         ADMIN, COLLATERAL_RATIO, DEBT_EXPIRATION, LIQUIDATION_FEE_PCT, MARKET_IDS, MINT_POSITIONS,
@@ -18,6 +18,7 @@ use crate::{
     },
     structs::{
         DebtTokenRecord, MarketRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio,
+        RegisteredMarketRecord,
     },
     ContractError,
 };
@@ -41,9 +42,28 @@ pub fn route_query(
         QueryMsg::GetBatchMintPositions { start_id, count } => {
             get_batch_mint_positions(deps, start_id, count)
         }
+        QueryMsg::GetRegisteredMarkets {} => get_registered_markets(deps),
     };
 
     return Ok(to_json_binary(&res)?);
+}
+
+fn get_registered_markets(deps: Deps<InjectiveQueryWrapper>) -> Box<dyn Serialize> {
+    let registered_markets = MARKET_IDS
+        .range(deps.storage, None, None, cosmwasm_std::Order::Ascending)
+        .filter_map(|rec| match rec {
+            Err(_) => None,
+            Ok(((base_currency, quote_currency), market_id)) => Some(RegisteredMarketRecord {
+                base_currency,
+                quote_currency,
+                market_id,
+            }),
+        })
+        .collect();
+
+    return Box::new(GetRegisteredMarketsResponse {
+        markets: registered_markets,
+    });
 }
 
 fn get_batch_mint_positions(
