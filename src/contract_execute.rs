@@ -313,24 +313,27 @@ fn execute_liquidate(
     }
 
     // process liquidation
-    // compute fee for liquidator and amount to sent back to user
+    // compute collateral from minted, fee for liquidator and amount to sent back to user
+    let collateral_from_minted: Uint128 = (debt_value / midprice_collateral_usdt).to_u256().try_into().unwrap();
+    
     let fee_liquidator_pct = LIQUIDATION_FEE_PCT.load(deps.storage)?;
     let fee_liquidator_amount: Uint128 = fee_liquidator_pct
         .mul(position_data.collateral_asset.amount.u128() as i128)
         .to_u256()
         .try_into()
         .unwrap();
-    let collateral_sent_back = position_data.collateral_asset.amount - fee_liquidator_amount;
+
+    let collateral_sent_back = position_data.collateral_asset.amount - collateral_from_minted - fee_liquidator_amount;
 
     // prep messages
     let mut msgs: Vec<CosmosMsg<InjectiveMsgWrapper>> = vec![];
 
-    // send fee to liquidator
+    // send fee + liquidated collateral to liquidator
     msgs.push(
         BankMsg::Send {
             to_address: info.sender.to_string(),
             amount: vec![Coin {
-                amount: fee_liquidator_amount,
+                amount: collateral_from_minted + fee_liquidator_amount,
                 denom: position_data.collateral_asset.denom.clone(),
             }],
         }
