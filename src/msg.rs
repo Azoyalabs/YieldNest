@@ -22,6 +22,10 @@ pub enum AdminExecuteMsg {
         subdenom: String,
         expiry: Timestamp,
     },
+    RegisterDebtToken {
+        denom: String,
+        expiry: Timestamp,
+    },
     /*
     CreateMarket {
         base_denom: String,

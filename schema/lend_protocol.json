@@ -163,6 +163,31 @@
           {
             "type": "object",
             "required": [
+              "register_debt_token"
+            ],
+            "properties": {
+              "register_debt_token": {
+                "type": "object",
+                "required": [
+                  "denom",
+                  "expiry"
+                ],
+                "properties": {
+                  "denom": {
+                    "type": "string"
+                  },
+                  "expiry": {
+                    "$ref": "#/definitions/Timestamp"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
               "register_market"
             ],
             "properties": {

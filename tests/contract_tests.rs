@@ -15,7 +15,6 @@ mod tests {
     const TEST_ADMIN: &'static str = "ADMIN";
     const CONTRACT_LABEL: &'static str = "CONTRACT_LABEL";
 
-
     #[test]
     fn try_access_bank() {
         let mut app = create_app();
@@ -29,6 +28,5 @@ mod tests {
                 amount: vec![coin(1000, denom)],
             },
         ));
-
     }
 }

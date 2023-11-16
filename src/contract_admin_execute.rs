@@ -28,6 +28,9 @@ pub fn route_admin_execute(
         AdminExecuteMsg::CreateDebtToken { subdenom, expiry } => {
             execute_create_debt_token(deps, env, subdenom, expiry)
         }
+        AdminExecuteMsg::RegisterDebtToken { denom, expiry } => {
+            execute_register_debt_token(deps, env, denom, expiry)
+        }
         AdminExecuteMsg::MintDenom { mint_data } => execute_mint_denom(deps, env, info, mint_data),
         /*
         AdminExecuteMsg::CreateMarket {
@@ -66,6 +69,20 @@ fn execute_create_market(
     //return Ok(Response::new());
 }
 */
+
+/// Register an externally created debt token
+/// Contract is required to be admin of this denom, so denom admin must be updated
+fn execute_register_debt_token(
+    deps: DepsMut<InjectiveQueryWrapper>,
+    env: Env,
+    denom: String,
+    expiry: Timestamp,
+) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
+    // register expiry
+    DEBT_EXPIRATION.save(deps.storage, denom, &expiry)?;
+
+    return Ok(Response::new());
+}
 
 /// Call the token factory module to create a new debt token
 /// From docs: The tokenfactory module allows any account to create a new token with the name factory/{creator address}/{subdenom}.
