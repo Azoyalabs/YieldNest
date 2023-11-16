@@ -153,13 +153,6 @@ pub enum InjectiveMsg {
         sender: Addr,
         contract_address: Addr,
     },
-
-    // adding auction messages 
-    MsgBid {
-        sender: Addr,
-        bid_amount: Coin,
-        round: u64
-    }    
 }
 
 pub fn create_deposit_msg(sender: Addr, subaccount_id: SubaccountId, amount: Coin) -> CosmosMsg<InjectiveMsgWrapper> {

@@ -20,7 +20,6 @@ use crate::{
         DebtTokenRecord, MarketRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio,
         RegisteredMarketRecord,
     },
-    ContractError,
 };
 
 pub fn route_query(

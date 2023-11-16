@@ -1,4 +1,4 @@
-use cosmwasm_std::{Coin, Deps, Storage, Timestamp};
+use cosmwasm_std::{Coin, Storage, Timestamp};
 
 use crate::{state::DEBT_EXPIRATION, structs::DebtTokenStatus, ContractError};
 
@@ -49,4 +49,4 @@ pub fn parse_debt_token_components(denom_name: String, contract_address: String)
     // parse expiry etc
 }
 
-pub fn compute_collateralization_ratio(minted: Coin, collateral: Coin, deps: Deps) {}
+//pub fn compute_collateralization_ratio(minted: Coin, collateral: Coin, deps: Deps) {}

@@ -1,0 +1,27 @@
+[package]
+name = "injective_custom"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cosmwasm-schema = "1.2.7"
+cosmwasm-std = { version = "1.2.7", features = ["staking", "stargate"] }
+cosmwasm-storage = "1.1.3"
+cw-storage-plus = "1.1.0"
+schemars = "0.8.10"
+serde = { version = "1.0.145", default-features = false, features = ["derive"] }
+erased-serde = "0.3.23"
+thiserror = { version = "1.0.31" }
+
+anyhow = "1.0.75"
+injective-cosmwasm = "0.2.14"
+injective-math = "0.2.2"
+injective-std = "0.1.4"
+cw-multi-test = { version = "0.18.0", features = ["cosmwasm_1_4", "stargate", "staking"] }
+cw-utils = "1.0.2"
+sha2 = {version="0.9.9", default-features=false}
+hex = "0.4.3"
+
+

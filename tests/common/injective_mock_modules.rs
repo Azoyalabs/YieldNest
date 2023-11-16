@@ -1,16 +1,44 @@
+use std::collections::HashMap;
+
 use cosmwasm_std::{
-    testing::MockApi, Addr, Empty, GovMsg, IbcMsg, IbcQuery, MemoryStorage, WasmMsg, WasmQuery,
+    testing::MockApi, Addr, Empty, GovMsg, IbcMsg, IbcQuery, MemoryStorage, Uint128, WasmMsg,
+    WasmQuery,
 };
 use cw_multi_test::{
     App, AppBuilder, BankKeeper, DistributionKeeper, Executor, FailingModule, Module, StakeKeeper,
     Wasm, WasmKeeper,
 };
-use injective_cosmwasm::{InjectiveMsg, InjectiveQuery, InjectiveQueryWrapper};
+use injective_cosmwasm::{Hash, InjectiveMsg, InjectiveQuery, InjectiveQueryWrapper};
 use lend_protocol::msg::InstantiateMsg;
 
 use anyhow::{Context, Result as AnyResult};
 
-pub struct CustomInjective {}
+pub struct TokenFactory {
+    /// tracking balances for custom denoms? or can call bank?
+    pub balances: HashMap<(String, String), Uint128>,
+}
+
+impl TokenFactory {
+    pub fn new() -> Self {
+        return TokenFactory {
+            balances: HashMap::new(),
+        };
+    }
+
+    pub fn mint(&self) {}
+}
+
+pub struct CustomInjective {
+    pub token_factory: TokenFactory,
+}
+
+impl CustomInjective {
+    pub fn new() -> Self {
+        return CustomInjective {
+            token_factory: TokenFactory::new(),
+        };
+    }
+}
 
 impl Module for CustomInjective {
     type ExecT = InjectiveMsg;
@@ -42,6 +70,7 @@ impl Module for CustomInjective {
             } => {
                 panic!("oh no") //Ok(())
             }
+            //InjectiveMsg::Mint { sender, amount, mint_to } => self.token_factory.mint(),
             _ => panic!("yep"),
         }
     }
@@ -106,7 +135,7 @@ pub fn create_app() -> App<
         .with_wasm::<Box<dyn Wasm<WasmMsg, WasmQuery>>, WasmKeeper<InjectiveMsg, InjectiveQueryWrapper>>(wasm_keeper);
     */
     let builder = AppBuilder::new_custom();
-    let builder = builder.with_custom(CustomInjective {});
+    let builder = builder.with_custom(CustomInjective::new());
     //let builder = builder.with_wasm(WasmKeeper::<InjectiveMsg, InjectiveQueryWrapper>::new());
 
     return builder.build(|_, _, _| {});
