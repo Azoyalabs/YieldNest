@@ -63,6 +63,7 @@ anyhow = "1.0.75"
 anyhow = "1.0.75"
 cw-multi-test = {path="./cw-multi-test"}  # "0.17.0"
 #robot_code_gen = {git="https://github.com/Azoyalabs/RobotCodeGen"}
+#custom_injective = {path="./packages/custom_injective"}
 
 [build-dependencies]
 #robot_code_gen = {git="https://github.com/Azoyalabs/RobotCodeGen"}

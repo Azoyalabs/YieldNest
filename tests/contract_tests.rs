@@ -15,11 +15,6 @@ mod tests {
     const TEST_ADMIN: &'static str = "ADMIN";
     const CONTRACT_LABEL: &'static str = "CONTRACT_LABEL";
 
-    #[test]
-    fn create_app() {
-        let mut router = App::default();
-        let mut router = create_app();
-    }
 
     #[test]
     fn try_access_bank() {
@@ -35,6 +30,5 @@ mod tests {
             },
         ));
 
-        app.read_module(|x| yup);
     }
 }
