@@ -37,6 +37,11 @@ pub enum AdminExecuteMsg {
         quote_currency: String,
         market_id: String,
     },
+    RemoveMarket {
+        base_currency: String,
+        quote_currency: String,
+    },
+
     MintDenom {
         mint_data: Coin,
     },

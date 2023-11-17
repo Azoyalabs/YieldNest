@@ -43,7 +43,21 @@ pub fn route_admin_execute(
             quote_currency,
             market_id,
         } => execute_register_market(deps, base_currency, quote_currency, market_id),
+        AdminExecuteMsg::RemoveMarket {
+            base_currency,
+            quote_currency,
+        } => execute_remove_market(deps, base_currency, quote_currency),
     }
+}
+
+fn execute_remove_market(
+    deps: DepsMut<InjectiveQueryWrapper>,
+    base_currency: String,
+    quote_currency: String,
+) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
+    MARKET_IDS.remove(deps.storage, (base_currency, quote_currency));
+
+    return Ok(Response::new());
 }
 
 fn execute_register_market(

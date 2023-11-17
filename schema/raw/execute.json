@@ -195,6 +195,31 @@
         {
           "type": "object",
           "required": [
+            "remove_market"
+          ],
+          "properties": {
+            "remove_market": {
+              "type": "object",
+              "required": [
+                "base_currency",
+                "quote_currency"
+              ],
+              "properties": {
+                "base_currency": {
+                  "type": "string"
+                },
+                "quote_currency": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
             "mint_denom"
           ],
           "properties": {

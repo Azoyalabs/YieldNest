@@ -7,8 +7,8 @@ use injective_cosmwasm::{
 use crate::{
     msg::ExecuteMsg,
     state::{
-        COLLATERAL_RATIO, LIQUIDATION_FEE_PCT, MARKET_IDS, MINT_POSITIONS, TRACKER_MINT_ID,
-        USER_MINT_POSITIONS,
+        COLLATERAL_RATIO, INJ_USDT_MARKET_ID, LIQUIDATION_FEE_PCT, MARKET_IDS, MINT_POSITIONS,
+        TRACKER_MINT_ID, USDT_MARKET_ID, USER_MINT_POSITIONS,
     },
     structs::{DebtTokenStatus, MintPositionRecord},
     utils::{validate_debt_token, validate_single_fund},
@@ -67,7 +67,7 @@ fn execute_redeem(
         to_address: info.sender.into_string(),
         amount: vec![Coin {
             amount: user_funds.amount,
-            denom: "usdt".to_string(),
+            denom: USDT_MARKET_ID.to_string(),
         }],
     };
 
@@ -158,10 +158,12 @@ fn execute_mint(
 
     // value inj deposit in usdt
     let querier = InjectiveQuerier::new(&deps.querier);
+    /*
     let market_id_inj_usdt =
-        MARKET_IDS.load(deps.storage, ("inj".to_string(), ("usdt".to_string())))?;
+        MARKET_IDS.load(deps.storage, ("inj".to_string(), (USDT_MARKET_ID.to_string())))?;
+    */
     let midprice_inj_usdt = match querier
-        .query_spot_market_mid_price_and_tob(&market_id_inj_usdt.as_str())
+        .query_spot_market_mid_price_and_tob(&INJ_USDT_MARKET_ID)
         .unwrap()
         .mid_price
     {
@@ -173,11 +175,13 @@ fn execute_mint(
 
     // get market id for the debt token
     // need to register market ids? coz it's a hash, not a string from the denoms
-    let debt_market_id =
-        match MARKET_IDS.load(deps.storage, (target_denom.clone(), "usdt".to_string())) {
-            Ok(val) => val,
-            Err(_) => return Err(ContractError::UnknownMarket {}),
-        };
+    let debt_market_id = match MARKET_IDS.load(
+        deps.storage,
+        (target_denom.clone(), USDT_MARKET_ID.to_string()),
+    ) {
+        Ok(val) => val,
+        Err(_) => return Err(ContractError::UnknownMarket {}),
+    };
 
     // get exchange midprice
     let midprice_debt_market = match querier
@@ -272,15 +276,17 @@ fn execute_liquidate(
     let querier = InjectiveQuerier::new(&deps.querier);
 
     // check if below collateralization ratio
+    /*
     let collateral_usdt_market_id = MARKET_IDS.load(
         deps.storage,
         (
             position_data.collateral_asset.denom.clone(),
-            "usdt".to_string(),
+            USDT_MARKET_ID.to_string(),
         ),
     )?;
+    */
     let midprice_collateral_usdt = match querier
-        .query_spot_market_mid_price_and_tob(&collateral_usdt_market_id.as_str())
+        .query_spot_market_mid_price_and_tob(&INJ_USDT_MARKET_ID)
         .unwrap()
         .mid_price
     {
@@ -292,7 +298,7 @@ fn execute_liquidate(
 
     let debt_usdt_market_id = MARKET_IDS.load(
         deps.storage,
-        (position_data.minted_asset.denom, "usdt".to_string()),
+        (position_data.minted_asset.denom, USDT_MARKET_ID.to_string()),
     )?;
     let midprice_debt_usdt = match querier
         .query_spot_market_mid_price_and_tob(&debt_usdt_market_id.as_str())

@@ -24,3 +24,9 @@ pub const USER_MINT_POSITIONS: Map<Addr, Vec<u64>> = Map::new("user_mint_positio
 
 /// Tracking the expiration timestamp of debt tokens  
 pub const DEBT_EXPIRATION: Map<String, Timestamp> = Map::new("debt_expiration");
+
+pub const USDT_MARKET_ID: &'static str = "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5";
+pub const USDT_TOKEN_ID: &'static str = "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5";
+
+pub const INJ_USDT_MARKET_ID: &'static str =
+    "0x0611780ba69656949525013d947713300f56c37b6175e02f26bffa495c3208fe";

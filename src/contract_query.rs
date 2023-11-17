@@ -13,8 +13,8 @@ use crate::{
         GetUserMintPositionsResponse, GetUserMintPositionsWithCollateralRatioResponse, QueryMsg,
     },
     state::{
-        ADMIN, COLLATERAL_RATIO, DEBT_EXPIRATION, LIQUIDATION_FEE_PCT, MARKET_IDS, MINT_POSITIONS,
-        USER_MINT_POSITIONS,
+        ADMIN, COLLATERAL_RATIO, DEBT_EXPIRATION, INJ_USDT_MARKET_ID, LIQUIDATION_FEE_PCT,
+        MARKET_IDS, MINT_POSITIONS, USDT_MARKET_ID, USER_MINT_POSITIONS,
     },
     structs::{
         DebtTokenRecord, MarketRecord, MintPositionRecord, MintPositionRecordWithCollateralRatio,
@@ -85,13 +85,15 @@ fn get_batch_mint_positions(
     let mut exchange_rates: HashMap<(String, String), FPDecimal> = HashMap::new();
 
     // get exchange rate inj usdt
+    /*
     let inj_usdt_market_id = MARKET_IDS
-        .load(deps.storage, ("inj".to_string(), "usdt".to_string()))
+        .load(deps.storage, ("inj".to_string(), USDT_MARKET_ID.to_string()))
         .unwrap();
+    */
 
     let querier = InjectiveQuerier::new(&deps.querier);
     let midprice_inj_usdt = querier
-        .query_spot_market_mid_price_and_tob(&inj_usdt_market_id.as_str())
+        .query_spot_market_mid_price_and_tob(&INJ_USDT_MARKET_ID)
         .unwrap()
         .mid_price
         .unwrap();
@@ -101,7 +103,7 @@ fn get_batch_mint_positions(
         // is the exchange rate in the hashmap?
         let price_debt_usdt = match exchange_rates.get(&(
             positions[i].1 .1.minted_asset.denom.clone(),
-            "usdt".to_string(),
+            USDT_MARKET_ID.to_string(),
         )) {
             Some(rate) => *rate,
             None => {
@@ -110,7 +112,7 @@ fn get_batch_mint_positions(
                         deps.storage,
                         (
                             positions[i].1 .1.minted_asset.denom.clone(),
-                            "usdt".to_string(),
+                            USDT_MARKET_ID.to_string(),
                         ),
                     )
                     .unwrap();
@@ -124,7 +126,7 @@ fn get_batch_mint_positions(
                 exchange_rates.insert(
                     (
                         positions[i].1 .1.minted_asset.denom.clone(),
-                        "usdt".to_string(),
+                        USDT_MARKET_ID.to_string(),
                     ),
                     debt_usdt_rate,
                 );
@@ -161,7 +163,10 @@ fn get_mint_position(deps: Deps<InjectiveQueryWrapper>, position_id: u64) -> Box
 
     // get exchange rate inj usdt
     let inj_usdt_market_id = MARKET_IDS
-        .load(deps.storage, ("inj".to_string(), "usdt".to_string()))
+        .load(
+            deps.storage,
+            ("inj".to_string(), USDT_MARKET_ID.to_string()),
+        )
         .unwrap();
 
     let querier = InjectiveQuerier::new(&deps.querier);
@@ -174,7 +179,10 @@ fn get_mint_position(deps: Deps<InjectiveQueryWrapper>, position_id: u64) -> Box
     let market_id = MARKET_IDS
         .load(
             deps.storage,
-            (position_data.minted_asset.denom.clone(), "usdt".to_string()),
+            (
+                position_data.minted_asset.denom.clone(),
+                USDT_MARKET_ID.to_string(),
+            ),
         )
         .unwrap();
 
@@ -220,9 +228,9 @@ fn get_debt_tokens(deps: Deps<InjectiveQueryWrapper>) -> Box<dyn Serialize> {
             Ok((denom, expiry)) => {
                 // get token market id
                 let market_id = MARKET_IDS
-                    .load(deps.storage, (denom.clone(), "usdt".to_string()))
+                    .load(deps.storage, (denom.clone(), USDT_MARKET_ID.to_string()))
                     .unwrap();
-                let market_ticker = format!("{}/usdt", denom);
+                let market_ticker = format!("{}/{}", denom, "usdt".to_string());
                 Some(DebtTokenRecord {
                     denom,
                     expiry,
@@ -277,13 +285,15 @@ fn get_user_mint_positions_with_collateral_ratio(
     let mut exchange_rates: HashMap<(String, String), FPDecimal> = HashMap::new();
 
     // get exchange rate inj usdt
+    /*
     let inj_usdt_market_id = MARKET_IDS
-        .load(deps.storage, ("inj".to_string(), "usdt".to_string()))
+        .load(deps.storage, ("inj".to_string(), USDT_MARKET_ID.to_string()))
         .unwrap();
+    */
 
     let querier = InjectiveQuerier::new(&deps.querier);
     let midprice_inj_usdt = querier
-        .query_spot_market_mid_price_and_tob(&inj_usdt_market_id.as_str())
+        .query_spot_market_mid_price_and_tob(&INJ_USDT_MARKET_ID)
         .unwrap()
         .mid_price
         .unwrap();
@@ -291,15 +301,19 @@ fn get_user_mint_positions_with_collateral_ratio(
     let mut positions_with_collateral_ratio: Vec<MintPositionRecordWithCollateralRatio> = vec![];
     for i in 0..positions.len() {
         // is the exchange rate in the hashmap?
-        let price_debt_usdt = match exchange_rates
-            .get(&(positions[i].minted_asset.denom.clone(), "usdt".to_string()))
-        {
+        let price_debt_usdt = match exchange_rates.get(&(
+            positions[i].minted_asset.denom.clone(),
+            USDT_MARKET_ID.to_string(),
+        )) {
             Some(rate) => *rate,
             None => {
                 let market_id = MARKET_IDS
                     .load(
                         deps.storage,
-                        (positions[i].minted_asset.denom.clone(), "usdt".to_string()),
+                        (
+                            positions[i].minted_asset.denom.clone(),
+                            USDT_MARKET_ID.to_string(),
+                        ),
                     )
                     .unwrap();
 
@@ -310,7 +324,10 @@ fn get_user_mint_positions_with_collateral_ratio(
                     .unwrap();
 
                 exchange_rates.insert(
-                    (positions[i].minted_asset.denom.clone(), "usdt".to_string()),
+                    (
+                        positions[i].minted_asset.denom.clone(),
+                        USDT_MARKET_ID.to_string(),
+                    ),
                     debt_usdt_rate,
                 );
 
