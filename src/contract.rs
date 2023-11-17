@@ -18,7 +18,7 @@ use crate::state::{ADMIN, COLLATERAL_RATIO, LIQUIDATION_FEE_PCT, TRACKER_MINT_ID
 use cw2::set_contract_version;
 
 // version info for migration info
-const CONTRACT_NAME: &str = "AzoyaLabs:GroupBid";
+const CONTRACT_NAME: &str = "AzoyaLabs:LendProtocol";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
