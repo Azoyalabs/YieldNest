@@ -13,7 +13,7 @@ use crate::contract_query::route_query;
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 
 use crate::error::ContractError;
-use crate::state::{ADMIN, COLLATERAL_RATIO, LIQUIDATION_FEE_PCT};
+use crate::state::{ADMIN, COLLATERAL_RATIO, LIQUIDATION_FEE_PCT, TRACKER_MINT_ID};
 
 use cw2::set_contract_version;
 
@@ -41,15 +41,24 @@ pub fn instantiate(
         &FPDecimal::from_str(&msg.collateral_ratio).unwrap(),
     )?;
 
+    TRACKER_MINT_ID.save(deps.storage, &0)?;
+
     return Ok(Response::new());
 }
 
 #[entry_point]
 pub fn migrate(
-    _deps: DepsMut<InjectiveQueryWrapper>,
+    deps: DepsMut<InjectiveQueryWrapper>,
     _env: Env,
     _msg: MigrateMsg,
 ) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
+    match TRACKER_MINT_ID.load(deps.storage) {
+        Ok(_) => (),
+        Err(_) => {
+            TRACKER_MINT_ID.save(deps.storage, &0)?;
+        }
+    };
+
     Ok(Response::default())
 }
 

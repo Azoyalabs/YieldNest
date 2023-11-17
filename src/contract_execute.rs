@@ -3,6 +3,7 @@ use injective_cosmwasm::{
     create_burn_tokens_msg, create_mint_tokens_msg, InjectiveMsgWrapper, InjectiveQuerier,
     InjectiveQueryWrapper,
 };
+use injective_math::FPDecimal;
 
 use crate::{
     msg::ExecuteMsg,
@@ -200,7 +201,9 @@ fn execute_mint(
 
     if debt_value_usdt / deposit_value_usdt > required_collateral_ratio {
         return Err(ContractError::InsufficientCollateral {
-            required_collateral_ratio: required_collateral_ratio,
+            required_collateral_ratio: required_collateral_ratio.mul(100),
+            value_collateral_usd: deposit_value_usdt,
+            value_debt_usd: debt_value_usdt
         });
     }
 

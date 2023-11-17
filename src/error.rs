@@ -34,9 +34,11 @@ pub enum ContractError {
     #[error("Token has expired")]
     TokenHasExpired {},
 
-    #[error("Insufficient collateral - must be at least {required_collateral_ratio}%")]
+    #[error("Insufficient collateral - must be at least {required_collateral_ratio}% - value collateral USD: {value_collateral_usd} - value debt usd: {value_debt_usd}")]
     InsufficientCollateral {
         required_collateral_ratio: FPDecimal,
+        value_collateral_usd: FPDecimal,
+        value_debt_usd: FPDecimal,
     },
 
     #[error("No valid midprice found")]
