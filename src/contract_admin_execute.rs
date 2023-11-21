@@ -88,7 +88,7 @@ fn execute_create_market(
 /// Contract is required to be admin of this denom, so denom admin must be updated
 fn execute_register_debt_token(
     deps: DepsMut<InjectiveQueryWrapper>,
-    env: Env,
+    _env: Env,
     denom: String,
     expiry: Timestamp,
 ) -> Result<Response<InjectiveMsgWrapper>, ContractError> {

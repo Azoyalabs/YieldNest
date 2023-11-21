@@ -3,7 +3,6 @@ use injective_cosmwasm::{
     create_burn_tokens_msg, create_mint_tokens_msg, InjectiveMsgWrapper, InjectiveQuerier,
     InjectiveQueryWrapper,
 };
-use injective_math::FPDecimal;
 
 use crate::{
     msg::ExecuteMsg,

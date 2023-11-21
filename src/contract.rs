@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult, Addr};
+use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 use injective_cosmwasm::{InjectiveMsgWrapper, InjectiveQueryWrapper};
 use injective_math::FPDecimal;
 
@@ -13,7 +13,7 @@ use crate::contract_query::route_query;
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 
 use crate::error::ContractError;
-use crate::state::{ADMIN, COLLATERAL_RATIO, LIQUIDATION_FEE_PCT, TRACKER_MINT_ID, USER_MINT_POSITIONS};
+use crate::state::{ADMIN, COLLATERAL_RATIO, LIQUIDATION_FEE_PCT, TRACKER_MINT_ID};
 
 use cw2::set_contract_version;
 
@@ -48,7 +48,7 @@ pub fn instantiate(
 
 #[entry_point]
 pub fn migrate(
-    deps: DepsMut<InjectiveQueryWrapper>,
+    _deps: DepsMut<InjectiveQueryWrapper>,
     _env: Env,
     _msg: MigrateMsg,
 ) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
