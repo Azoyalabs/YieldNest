@@ -46,7 +46,12 @@ pub enum AdminExecuteMsg {
         mint_data: Coin,
     },
 
-    
+    SetTokenMetadata {
+        denom: String,
+        denom_name: String,
+        symbol: String,
+        decimals: u8,
+    },
 }
 
 #[cw_serde]

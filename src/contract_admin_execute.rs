@@ -1,6 +1,7 @@
-use cosmwasm_std::{Coin, DepsMut, Env, MessageInfo, Response, Timestamp};
+use cosmwasm_std::{Coin, CustomMsg, DepsMut, Env, MessageInfo, Response, Timestamp};
 use injective_cosmwasm::{
-    create_mint_tokens_msg, create_new_denom_msg, InjectiveMsgWrapper, InjectiveQueryWrapper,
+    create_mint_tokens_msg, create_new_denom_msg, InjectiveMsg, InjectiveMsgWrapper,
+    InjectiveQueryWrapper, InjectiveRoute,
 };
 
 use crate::{
@@ -47,6 +48,12 @@ pub fn route_admin_execute(
             base_currency,
             quote_currency,
         } => execute_remove_market(deps, base_currency, quote_currency),
+        AdminExecuteMsg::SetTokenMetadata {
+            denom,
+            denom_name,
+            symbol,
+            decimals,
+        } => execute_set_token_metadata(deps, env, denom, denom_name, symbol, decimals),
     }
 }
 
@@ -84,6 +91,27 @@ fn execute_create_market(
 }
 */
 
+fn execute_set_token_metadata(
+    _deps: DepsMut<InjectiveQueryWrapper>,
+    _env: Env,
+    denom: String,
+    denom_name: String,
+    symbol: String,
+    decimals: u8,
+) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
+    let msg_wrapper = InjectiveMsgWrapper {
+        route: InjectiveRoute::Tokenfactory,
+        msg_data: InjectiveMsg::SetTokenMetadata {
+            denom: denom,
+            name: denom_name,
+            symbol: symbol,
+            decimals: decimals,
+        },
+    };
+
+    return Ok(Response::new().add_message(msg_wrapper));
+}
+
 /// Register an externally created debt token
 /// Contract is required to be admin of this denom, so denom admin must be updated
 fn execute_register_debt_token(
@@ -114,17 +142,6 @@ fn execute_create_debt_token(
 
     return Ok(Response::new().add_message(new_denom_msg));
 }
-
-/*
-fn execute_set_debt_token_metadata(
-    deps: DepsMut<InjectiveQueryWrapper>,
-    env: Env,
-    subdenom: String,
-) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
-
-
-}
-*/
 
 fn execute_mint_denom(
     _deps: DepsMut<InjectiveQueryWrapper>,

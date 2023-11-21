@@ -119,12 +119,19 @@ fn execute_repay(
     if debt_position_data.minted_asset.amount == Uint128::zero() {
         // if fully refunded, delete position
         MINT_POSITIONS.remove(deps.storage, position_id);
-        // and remove from user positions tracking 
-        USER_MINT_POSITIONS.update(deps.storage, minter.clone(), |user_positions| -> Result<_, ContractError> {
-            let user_positions = user_positions.unwrap();
-            let user_positions = user_positions.into_iter().filter(|pos_id| position_id.ne(pos_id)).collect();
-            return Ok(user_positions);
-        })?;
+        // and remove from user positions tracking
+        USER_MINT_POSITIONS.update(
+            deps.storage,
+            minter.clone(),
+            |user_positions| -> Result<_, ContractError> {
+                let user_positions = user_positions.unwrap();
+                let user_positions = user_positions
+                    .into_iter()
+                    .filter(|pos_id| position_id.ne(pos_id))
+                    .collect();
+                return Ok(user_positions);
+            },
+        )?;
 
         // and create refund collateral message
         msgs.push(CosmosMsg::Bank(BankMsg::Send {
@@ -208,7 +215,7 @@ fn execute_mint(
         return Err(ContractError::InsufficientCollateral {
             required_collateral_ratio: required_collateral_ratio.mul(100),
             value_collateral_usd: deposit_value_usdt,
-            value_debt_usd: debt_value_usdt
+            value_debt_usd: debt_value_usdt,
         });
     }
 

@@ -259,6 +259,41 @@
               }
             },
             "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_token_metadata"
+            ],
+            "properties": {
+              "set_token_metadata": {
+                "type": "object",
+                "required": [
+                  "decimals",
+                  "denom",
+                  "denom_name",
+                  "symbol"
+                ],
+                "properties": {
+                  "decimals": {
+                    "type": "integer",
+                    "format": "uint8",
+                    "minimum": 0.0
+                  },
+                  "denom": {
+                    "type": "string"
+                  },
+                  "denom_name": {
+                    "type": "string"
+                  },
+                  "symbol": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
           }
         ]
       },

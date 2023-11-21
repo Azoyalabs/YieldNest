@@ -52,7 +52,6 @@ pub fn migrate(
     _env: Env,
     _msg: MigrateMsg,
 ) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
-
     Ok(Response::default())
 }
 
