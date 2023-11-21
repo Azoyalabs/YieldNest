@@ -115,6 +115,17 @@ fn execute_create_debt_token(
     return Ok(Response::new().add_message(new_denom_msg));
 }
 
+/*
+fn execute_set_debt_token_metadata(
+    deps: DepsMut<InjectiveQueryWrapper>,
+    env: Env,
+    subdenom: String,
+) -> Result<Response<InjectiveMsgWrapper>, ContractError> {
+
+
+}
+*/
+
 fn execute_mint_denom(
     _deps: DepsMut<InjectiveQueryWrapper>,
     env: Env,

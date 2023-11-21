@@ -45,6 +45,8 @@ pub enum AdminExecuteMsg {
     MintDenom {
         mint_data: Coin,
     },
+
+    
 }
 
 #[cw_serde]
