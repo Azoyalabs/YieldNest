@@ -22,7 +22,7 @@ Yield Nest has been deployed to testnet and can be [accessed through a dedicated
 ## Key Features 
 
 Yield Nest is a flexible protocol and enables the following: 
-1- Creation of new debt products with different expiries and/or different collaterals. Our deployed contract on testnet provides a USDT based market for a INJ-backed debt product but it can be extended to cover other assets and be traded on markets with another quote currency than USDT.    
+1- Creation of new debt products with different expiration dates and/or different collaterals.    
 
 2- Debt positions are represented by Fungible tokens created using the TokenFactory module. As highlighted above these can be traded directly on native markets on Injective, but they can also be sent to other IBC-enabled blockchains such as Osmosis and be used in other protocols.    
 
@@ -132,13 +132,22 @@ This will return information about existing debt positions, including their id, 
 
 ## Testnet   
 
-The deployed smart contract can be found at the following address on the Injective testnet (injective-888):
+
+Yield Nest has been deployed on the Injective testnet (injective-888).   
+We've also created a sample debt asset (USDT_31DEC23) that uses INJ as a collateral, as well as a market to trade the debt itself (USDT_31DEC23/USDT)
 
 ```
-inj19q4flnf78evuhvzcfqhq8x9e800rjraj2whanu
+Yield Nest address:  
+inj19q4flnf78evuhvzcfqhq8x9e800rjraj2whanu   
+
+Debt token denomination (USDT_31DEC23):    
+factory/inj1m8vmsa84ha7up6cx3v7y7jj9egzl3u3vyzqml0/test_denom  
+
+Market id for USDT_31DEC23/USDT:  
+0xfd359c044664481b486665d3f7c5798faf6c2e5b88ca46399ddef71d9ee31fe3  
 ```
 
-A single market and debt token have been created to showcase the usage of Yield Nest. We recommend using our dedicated UI to interact with the contract (see Overview). You can also interact directly with the contract using the messages previously outlined.  
+We recommend using our dedicated UI to interact with the contract (see Overview). You can also interact directly with the contract using the messages previously outlined.  
 
 
 
