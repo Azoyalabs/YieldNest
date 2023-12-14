@@ -1,5 +1,5 @@
 {
-  "contract_name": "lend_protocol",
+  "contract_name": "yield_nest",
   "contract_version": "0.1.0",
   "idl_version": "1.0.0",
   "instantiate": {

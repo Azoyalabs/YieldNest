@@ -4,7 +4,7 @@ mod common;
 mod tests {
     use cosmwasm_std::{coin, Addr};
     use cw_multi_test::{App, AppBuilder, Executor, WasmKeeper};
-    use lend_protocol::msg::InstantiateMsg;
+    use yield_nest::msg::InstantiateMsg;
 
     use crate::common::injective_mock_modules::create_app;
     //use robot_code_gen::Robot;

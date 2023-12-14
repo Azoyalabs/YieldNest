@@ -759,26 +759,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lend_protocol"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cosmwasm-schema",
- "cosmwasm-std",
- "cosmwasm-storage",
- "cw-multi-test",
- "cw-storage-plus 1.1.0",
- "cw2",
- "erased-serde",
- "injective-cosmwasm",
- "injective-math",
- "injective-std",
- "schemars",
- "serde",
- "thiserror",
-]
-
-[[package]]
 name = "libc"
 version = "0.2.149"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1394,6 +1374,26 @@ name = "windows_x86_64_msvc"
 version = "0.48.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed94fce61571a4006852b7389a063ab983c02eb1bb37b47f8272ce92d06d9538"
+
+[[package]]
+name = "yield_nest"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cosmwasm-storage",
+ "cw-multi-test",
+ "cw-storage-plus 1.1.0",
+ "cw2",
+ "erased-serde",
+ "injective-cosmwasm",
+ "injective-math",
+ "injective-std",
+ "schemars",
+ "serde",
+ "thiserror",
+]
 
 [[package]]
 name = "zeroize"

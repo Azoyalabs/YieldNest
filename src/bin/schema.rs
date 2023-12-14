@@ -1,6 +1,6 @@
 use cosmwasm_schema::write_api;
 
-use lend_protocol::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
+use yield_nest::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 
 fn main() {
     write_api! {

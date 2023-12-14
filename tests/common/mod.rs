@@ -7,7 +7,7 @@ pub mod test_utils {
     use cw_multi_test::{Contract, ContractWrapper};
 
     // You'll need to change the lib name here
-    use lend_protocol::contract::{execute, instantiate, query};
+    use yield_nest::contract::{execute, instantiate, query};
 
     /*
     pub fn get_contract() -> Box<dyn Contract<Empty>> {
