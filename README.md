@@ -3,11 +3,11 @@
 ## Overview  
 
 Yield Nest is a protocol that implements a Fixed Rate Lending protocol through the emission of Zero Coupon bonds.  
-It is is deployed on the Injective testnet blockchain and makes use of its native modules, including the TokenFactory and the Exchange modules.  
+It is deployed on the Injective testnet blockchain and makes use of its native modules, including the TokenFactory and the Exchange modules.  
 
 
 Fixed Income markets represent one of the most liquid markets in traditional finance (around 3x bigger than equity markets).
-This interest for yield-bearing product is also found in cryptocurrency markets, most notably with liquidity pools for AMMs such as Osmosis or Uniswap, or even as staking (which is an essential part of governance in PoS blockchains).  
+This interest for yield-bearing products is also found in cryptocurrency markets, most notably with liquidity pools for AMMs such as Osmosis or Uniswap, or even as staking (which is an essential part of governance in PoS blockchains).  
 The main issue with these products is that they typically provide non-fixed interest rates (and even impermanent loss for liquidity provision in AMM) which makes it hard to estimate returns.  
 
 Yield Nest addresses this by providing a way to create Zero-coupon bonds which enable users to optimize their capital with clear return targets. The use of Fungible Tokens as well as the reliance on native DEX on the Injective blockchain makes these debt products liquid unlike staking.  
@@ -21,7 +21,7 @@ Yield Nest has been deployed to testnet and can be [accessed through a dedicated
 
 ## Key Features 
 
-Yield Nest is a flexible protocol and enables the following: 
+Yield Nest is a flexible protocol and enables the following:   
 1- Creation of new debt products with different expiration dates and/or different collaterals.    
 
 2- Debt positions are represented by Fungible tokens created using the TokenFactory module. As highlighted above these can be traded directly on native markets on Injective, but they can also be sent to other IBC-enabled blockchains such as Osmosis and be used in other protocols.    
