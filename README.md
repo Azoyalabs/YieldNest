@@ -14,9 +14,9 @@ Yield Nest addresses this by providing a way to create Zero-coupon bonds which e
 
 
 
-This is a submission for the [Injective Illuminate Hackathon.](https://dorahacks.io/hackathon/illuminate/detail). The buidl can be accessed directly [here.](what_is_the_link)  
+This is a submission for the [Injective Illuminate Hackathon.](https://dorahacks.io/hackathon/illuminate/detail). The buidl can be accessed directly [here.](https://dorahacks.io/buidl/8497)  
 
-Yield Nest has been deployed to testnet and can be [accessed through a dedicated UI.](what_is_the_link) 
+Yield Nest has been deployed to testnet and can be [accessed through a dedicated UI.](https://yield-nest-ui.vercel.app/) 
 
 
 ## Key Features 
