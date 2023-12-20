@@ -38,7 +38,7 @@ Yield Nest is a flexible protocol and enables the following:
 1- A new debt token is created using the TokenFactory module, along with its metadata.  
 2- A relevant market is created on the exchange module, either through a governance proposal or an immediate creation.  
 3- Both the debt token and its market are registered on the smart contract for fast access using the RegisterDebtToken and RegisterMarket admin messages.  
-4- The admin or market maker provides the initial liquidity on the market, both buy side and sell side
+4- The admin or market maker provides the initial liquidity on the market, both buy side and sell side  
 5- Users are now able to mint new debt and trade the debt asset on the market  
 
 
